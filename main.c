@@ -13,30 +13,37 @@
 #include <microhttpd.h>
 
 #include "arquivos.h"
+#include "roteador.h"
 
 #define PORT 8080
-
-
 
 // função callback de resposta.
 enum MHD_Result responder_conexao(
       void* cls,
       struct MHD_Connection* conexao,
-      const char* url,
+      const char* url_path,
       const char* metodo, const char* versao,
       const char* uploadData,
       long unsigned int* uploadDataSize, void** req_cls
     )
 {
-  FILE* fp = abrirArquivoSomenteLeitura( "./public/index.html" );
-  long tam = obterTamanhoArquivo( fp );
-  char* pagina = alocarBufferNaMemoria( tam, fp );
+  char* caminho = malloc( sizeof(char) * (strlen(url_path)+1) );
+  sprintf( caminho, "%s%s", ".", url_path );
 
-  fread( pagina, 1, tam, fp );
-  fclose(fp);
+  FILE* fp = fopen( caminho, "r" );
+  free(caminho);
+  fp = emitirNaoEncontrado( fp );
+
+  long tam = obterTamanhoArquivo( fp );
+  char* pagina = malloc( sizeof(char) * tam );
 
   struct MHD_Response* resposta;
   int ret;
+
+  printf( "%s %s %s\n", url_path, metodo, versao );
+
+  fread( pagina, 1, tam, fp );
+  fclose(fp);
 
   resposta = MHD_create_response_from_buffer( tam, (void*) pagina, MHD_RESPMEM_PERSISTENT );
   ret = MHD_queue_response( conexao, MHD_HTTP_OK, resposta );

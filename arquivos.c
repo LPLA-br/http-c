@@ -3,18 +3,24 @@
 
 #include "arquivos.h"
 
-FILE* abrirArquivoSomenteLeitura( const char* caminho )
+//------------------------------------------
+
+/** garante arquivo para entrega. */
+FILE* emitirNaoEncontrado( FILE* fp )
 {
-  FILE* fp = fopen( caminho, "r" );
-
-  if (!fp)
+  if ( !fp )
   {
-    perror("Abertura arquivo falhou. ABORTANDO");
-    exit(1);
+    fp = fopen( "./public/notfound.html", "r");
+    if ( !fp )
+    {
+      perror("emitirNaoEncontrado() notfound.html não encontrado !\n");
+      exit(1);
+    }
   }
-
   return fp;
 }
+
+//------------------------------------------
 
 long obterTamanhoArquivo( FILE* fp )
 {
@@ -27,20 +33,6 @@ long obterTamanhoArquivo( FILE* fp )
   return tamanho;
 }
 
-// depende de fp OK
-char* alocarBufferNaMemoria( long tamanho, FILE* fp )
-{
-  char* buffer;
-  buffer = malloc( sizeof(char) * tamanho );
-  if ( !buffer )
-  {
-    perror("Buffer não alocou !");
-    fclose( fp );
-    exit(1);
-  }
-  return buffer;
-}
-
 void jogarArquivoParaSTDOUT( char* buffer, long tamanho )
 {
   for ( int i=0; i<tamanho; i++ )
@@ -49,19 +41,4 @@ void jogarArquivoParaSTDOUT( char* buffer, long tamanho )
   }
 }
 
-/* //DEMONSTRAÇÃO
-int main(int argc, char *argv[])
-{
-  FILE* fp = abrirArquivoSomenteLeitura( "./public/index.html" );
-  long tamanho = obterTamanhoArquivo( fp );
-  char* buffer = alocarBufferNaMemoria( tamanho, fp );
-
-  fread( buffer, 1, tamanho, fp );
-  jogarArquivoParaSTDOUT( buffer, tamanho );
-
-  fclose(fp);
-  free(buffer);
-	exit(0);
-}
-*/
 
