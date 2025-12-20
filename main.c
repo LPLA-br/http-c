@@ -13,7 +13,6 @@
 #include <microhttpd.h>
 
 #include "arquivos.h"
-#include "roteador.h"
 
 #define PORT 8080
 
